@@ -7,6 +7,7 @@ use App\Dto\TlinkDataCreateDto;
 use App\Models\TLink;
 use App\Repositories\TLinkRepository;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
@@ -35,16 +36,11 @@ class TLinkService
     {
         $token = $this->generateRandomToken();
 
-        $data = array_merge(
-            $dto->all(),
-            [
-                'token' => $token
-            ]
-        );
+        $data = array_merge($dto->all(), ['token' => $token]);
 
-        $created = TLink::create($data);
+        $createdModel = $this->createModel($data);
 
-        if (!$created) {
+        if (!$createdModel) {
             return null;
         }
 
@@ -55,15 +51,11 @@ class TLinkService
      * @param string $link
      * @return mixed
      */
-    public function link(string $token)
+    public function link(string $token) : mixed
     {
         $linkBase = $this->linkRepository->getForShow($token);
 
-        if (!$linkBase) {
-            return false;
-        }
-
-        if (!$this->validateLink($linkBase)) {
+        if (!$linkBase || !$this->validateLink($linkBase)) {
             return false;
         }
 
@@ -84,16 +76,16 @@ class TLinkService
      * @param string $name
      * @return string
      */
-    protected function createLink(string $token)
+    protected function createLink(string $token) : string
     {
         return route(config('tlink.route_name'), ['token' => $token]);
     }
 
     /**
      * @param TLink $link
-     * @return false
+     * @return bool
      */
-    protected function validateLink(TLink $link)
+    protected function validateLink(TLink $link) : bool
     {
         $finishedTime = Carbon::parse($link->created_at)->addMinutes($link->lifetime);
 
@@ -114,7 +106,7 @@ class TLinkService
      * @param TLink $linkBase
      * @return bool
      */
-    protected function markAsNotActive(Tlink $linkBase)
+    protected function markAsNotActive(Tlink $linkBase) : bool
     {
         $linkBase->is_active = TLink::LINK_NOT_ACTIVE_STATE;
         return $linkBase->save();
@@ -124,9 +116,18 @@ class TLinkService
      * @param TLink $link
      * @return bool
      */
-    protected function incrementTransitionCount(TLink $link)
+    protected function incrementTransitionCount(TLink $link) : bool
     {
         $link->transitions++;
         return $link->save();
+    }
+
+    /**
+     * @param array $data
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     */
+    protected function createModel(array $data) : Model
+    {
+        return TLink::query()->create($data);
     }
 }
