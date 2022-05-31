@@ -13,12 +13,9 @@ return [
     'tlink_field_limit' => 'Transition limit (0 = unlimited)',
     'tlink_field_limit_placeholder' => 'Enter the number of hits for the link',
     'tlink_field_limit_help' => 'Enter transition limit for link',
-//    'tlink_field_lifetime_1' => 'Lifetime required* (minutes | max:',
-//    'tlink_field_lifetime_2' => 'minutes =',
-//    'tlink_field_lifetime_3' => 'hours)',
     'tlink_field_lifetime' => 'Lifetime required* (minutes | max:'
-        .config('tlink.lifetime.max').' minutes ='
-        .convert_time_to_hours("config('tlink.lifetime.max'").' hours)',
+        .config('tlink.lifetime.max').' minutes = '
+        .convert_time_to_hours(config('tlink.lifetime.max')).' hours)',
     'tlink_field_lifetime_placeholder' => 'Enter link lifetime',
     'tlink_field_lifetime_help' => 'Enter lifetime for link',
     'btn_create_link' => 'Create link'
